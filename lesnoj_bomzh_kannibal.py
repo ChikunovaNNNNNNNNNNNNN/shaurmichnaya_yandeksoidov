@@ -3,7 +3,7 @@ import sys
 import pygame
 
 pygame.init()
-pygame.display.set_caption("герой двигается!")
+pygame.display.set_caption("распили меня болгаркой...")
 size = width, height = 800, 800
 screen = pygame.display.set_mode(size)
 background_image = pygame.image.load('jj (1).png')
@@ -29,9 +29,7 @@ def load_image(name, colorkey=None):
 
 
 class MySprite(pygame.sprite.Sprite):
-
     image = load_image("se.png")
-
 
     def __init__(self, *group):
         super().__init__(*group)
@@ -63,7 +61,7 @@ def main():
     clock = pygame.time.Clock()
     event_key = None
     while running:
-        screen.blit( background_image, ( 0,0 ) )
+        screen.blit(background_image, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
