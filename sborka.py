@@ -1,12 +1,17 @@
 import pygame
+import subprocess
 import sys
+from moviepy.editor import VideoFileClip
 
 pygame.init()
 screen_width, screen_height = 800, 800
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption("Шаурмичная Яндексоидов")
 background_image = pygame.image.load('k.jpg')
-# Устанавливаем размеры окна
+pygame.mixer.init()
+pygame.mixer.music.load("2ч.mp3")
+pygame.mixer.music.play()
+# Устанавливаем размеры окна и АТМОСФЕРНЫЙ МУЗОН
 
 sprite_image = pygame.image.load('та.png')
 sprite_rect = sprite_image.get_rect(centerx=280, centery=700)  # 1спрайт
@@ -32,7 +37,7 @@ h = pygame.image.load('чили.webp')
 hr = s.get_rect(centerx=670, centery=700)  # 11 спрайт
 
 j = pygame.image.load('огурец.webp')
-jr = s.get_rect(centerx=110, centery=660)  # 11 спрайт
+jr = s.get_rect(centerx=110, centery=660)  # 12 спрайт
 
 dragging, d, qd, wd, td, gd, fd, hd, ad, ed, rd, jd = False, False, False, False, False, False, \
     False, False, False, \
@@ -42,7 +47,7 @@ while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()
+            running = False
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if sprite_rect.collidepoint(event.pos):
@@ -201,13 +206,23 @@ while True:
         if event.type == pygame.MOUSEMOTION and jd:
             jr.x = event.pos[0] + ofxj
             jr.y = event.pos[1] + ofyj
-    # Перемещение спрайта
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if button_rect.collidepoint(event.pos):
+                video_clip = VideoFileClip("заставка.mp4")
+                video_clip.preview()
+                subprocess.Popen('main.py')
 
+    # Перемещение спрайта
+    myfont = pygame.font.SysFont("monospace", 30)
+    label = myfont.render("Соберите ШАУРМУ", 1, (60, 170, 60))
+    button_font = pygame.font.Font(None, 36)
+    button_text = button_font.render('ГОТОВО', True, (0, 250, 30))
+    button_rect = button_text.get_rect(center=(400, 750))
+    # ТЕКСТ
     screen.fill((255, 255, 255))
     screen.blit(background_image, (0, 0))
     screen.blit(e, er)
     screen.blit(s, sr)
-    screen.blit(sprite_image, sprite_rect)
     screen.blit(q, qr)
     screen.blit(w, wr)
     screen.blit(r, rr)
@@ -216,6 +231,9 @@ while True:
     screen.blit(h, hr)
     screen.blit(f, fr)
     screen.blit(g, gr)
+    screen.blit(label, (265, 650))
     screen.blit(j, jr)
+    screen.blit(button_text, button_rect)
+    screen.blit(sprite_image, sprite_rect)
     pygame.display.flip()
     # Отображение спрайта на экране
