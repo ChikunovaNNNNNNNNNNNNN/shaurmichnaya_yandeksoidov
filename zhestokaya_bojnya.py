@@ -110,37 +110,17 @@ class Board:
         self.width = width
         self.height = height
         self.board = [[0] * width for _ in range(height)]
-        self.left = 10
-        self.top = 10
-        self.cell_size = 30
+        self.left = 160
+        self.top = 210
+        self.cell_size = 80
         self.color = pygame.Color(255, 110, 60)
         self.cell_x = self.cell_y = None
-
-    def set_view(self, left, top, cell_size):
-        self.left = left
-        self.top = top
-        self.cell_size = cell_size
 
     def render(self, screen):
         for y in range(self.height):
             for x in range(self.width):
                 coords = (x * self.cell_size + self.left, y * self.cell_size + self.top, self.cell_size, self.cell_size)
                 pygame.draw.rect(screen, self.color, coords, 1)
-
-    def get_click(self, pos):
-        self.cell_x = (pos[0] - self.left) // self.cell_size
-        self.cell_y = (pos[1] - self.top) // self.cell_size
-        if (pos[0] < self.left or pos[1] < self.top or pos[0] > self.left + self.cell_size * self.width or pos[
-            1] > self.top + self.cell_size * self.height):
-            self.cell_x = self.cell_y = None
-        self.print_click()
-        return self.cell_x, self.cell_y
-
-    def print_click(self):
-        if self.cell_x is None:
-            print("None")
-        else:
-            print(f"({self.cell_x}, {self.cell_y})")
 
 
 def load_level(filename):
@@ -155,6 +135,23 @@ class Tile(pygame.sprite.Sprite):
         self.image = tile_images[tile_type]
         self.rect = self.image.get_rect().move(
                 tile_width * pos_x + 170, tile_height * pos_y + 220)
+
+
+def generate_level(level):
+    new_player, x, y = None, None, None
+    for y in range(len(level)):
+        for x in range(len(level[y])):
+            if level[y][x] == '*':
+                Tile('bleu', x, y)
+            elif level[y][x] == '.':
+                Tile('violet', x, y)
+            elif level[y][x] == '+':
+                Tile('jaune', x, y)
+            elif level[y][x] == '-':
+                Tile('vert', x, y)
+            elif level[y][x] == '=':
+                Tile('rouge', x, y)
+    return new_player, x, y
 
 
 def generate_couleurs(level):
@@ -180,42 +177,31 @@ def generate_couleurs(level):
             elif level[y][x] == '=':
                 Tile('rouge', x, y)
                 rouge.append((x, y))
-    return blue, violet, jaune, vert, rouge
-
-def generate_level(level):
-    new_player, x, y = None, None, None
-    for y in range(len(level)):
-        for x in range(len(level[y])):
-            if level[y][x] == '*':
-                Tile('bleu', x, y)
-            elif level[y][x] == '.':
-                Tile('violet', x, y)
-            elif level[y][x] == '+':
-                Tile('jaune', x, y)
-            elif level[y][x] == '-':
-                Tile('vert', x, y)
-            elif level[y][x] == '=':
-                Tile('rouge', x, y)
-    return new_player, x, y
-
-player, level_x, level_y = generate_level(load_level('map.txt'))
+    tous = [blue] + [violet] + [jaune] + [vert] + [rouge]
+    return tous
 
 
 class Game:
-    def __init__(self, bleu, violet, jaune, vert, rouge):
-        self.bleu = generate_couleurs(bleu)
-        self.violet = generate_couleurs(violet)
-        self.jaune = generate_couleurs(jaune)
-        self.vert = generate_couleurs(vert)
-        self.rouge = generate_couleurs(rouge)
+    def __init__(self, tous):
+        self.width = width
+        self.height = height
+        self.left = 160
+        self.top = 210
+        self.cell_x = self.cell_y = None
+        self.cell_size = 80
+        self.tous = generate_couleurs(tous)
 
 
-    def get_position(self):
-        for cords in self.bleu:
-            ...
+    def get_position(self, pos):
+        self.cell_x = (pos[0] - self.left) // self.cell_size
+        self.cell_y = (pos[1] - self.top) // self.cell_size
+        if (pos[0] < self.left or pos[1] < self.top or pos[0] > self.left + self.cell_size * self.width or pos[
+            1] > self.top + self.cell_size * self.height):
+            self.cell_x = self.cell_y = None
+        self.place()
 
-    def place(self, b, v, j, ve, r):
-        print(b, v, j, ve, r, sep='\n')
+    def place(self):
+        ...
 
 
 
@@ -225,12 +211,15 @@ def main():
     jaune = Jaune(all_sprites)
     vert = Vert(all_sprites)
     rouge = Rouge(all_sprites)
-    game = Game
+    level = load_level('map.txt')
+    tous = generate_couleurs(level)
+
+
 
     fps = 60
     clock = pygame.time.Clock()
     board = Board(6, 6)
-    board.set_view(160, 210, 80)
+    game = Game(tous)
     running = True
     background = pygame.image.load('фон.jpg').convert()
     gameDisplay = pygame.display.set_mode(size)
@@ -243,8 +232,7 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 2:
-                    board.get_click(event.pos)
+                game.get_position(event.pos)
 
         all_sprites.draw(screen)
 
